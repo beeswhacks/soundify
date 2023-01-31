@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 var cors = require('cors');
-
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
 router.get('/', cors(), (req, res) => {
-    JSDOM.fromURL('https://www.bbc.co.uk/sounds/play/m001hbqv', {resources: 'usable'})
+    var tracklist = {};
+    const url = 'https://www.bbc.co.uk/sounds/play/m001hbqv';
+    JSDOM.fromURL(url, {resources: 'usable'})
         .then(dom => {
             const scripts = dom.window.document.querySelectorAll('body script');
             const searchText = 'window.__PRELOADED_STATE__ = '
@@ -19,12 +20,12 @@ router.get('/', cors(), (req, res) => {
             });
             return isolatedScript;
         })
-        .then(result => {
-            const scriptJSON = JSON.parse(result);
-            console.log(scriptJSON.tracklist)
+        .then(isolatedScript => {
+            scriptJSON = JSON.parse(isolatedScript);
+            tracklist = scriptJSON.tracklist
+            return tracklist
         })
-
-    res.send('Hello world.');
+        .then(tracklist => res.json(tracklist))
 });
 
 module.exports = router;
