@@ -1,0 +1,25 @@
+.App {
+  text-align: center;
+}
+
+html {
+  background-color: #252323;
+}
+
+.light-font {
+  color: #D7CDCC;
+}
+
+.title {
+  margin: 25% auto auto auto;
+  color: #1ED760;
+  font-size: 5em;
+}
+
+.wrap-text {
+  overflow: hidden;
+}
+
+#url {
+  width: 22em;
+}

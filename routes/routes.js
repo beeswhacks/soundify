@@ -4,9 +4,9 @@ var cors = require('cors');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
-router.get('/', cors(), (req, res) => {
-    var tracklist = {};
-    const url = 'https://www.bbc.co.uk/sounds/play/m001hbqv';
+router.post('/api/:showId', cors(), (req, res) => {
+    var tracklist;
+    const url = 'https://www.bbc.co.uk/sounds/play/' + req.params.showId;
     JSDOM.fromURL(url, {resources: 'usable'})
         .then(dom => {
             const scripts = dom.window.document.querySelectorAll('body script');
@@ -26,6 +26,9 @@ router.get('/', cors(), (req, res) => {
             return tracklist
         })
         .then(tracklist => res.json(tracklist))
+        .catch(err => {
+            if (err) {res.sendStatus(500)};
+        });
 });
 
 module.exports = router;
