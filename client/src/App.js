@@ -1,7 +1,22 @@
 import './App.css';
 import { useState } from 'react';
 
+function LogIn() {
+
+  function handleClick() {
+    fetch('/api/login');
+  }
+
+  return (
+    <div>
+      {/* <button className='round-green-button normalise-font' onClick={handleClick}>Connect to Spotify</button> */}
+      <a href='/api/login' className='round-green-button normalise-font'>Connect to Spotify</a>
+    </div>
+  )
+}
+
 function URLGetter() {
+
   const [feedback, setFeedback] = useState('');
 
   function handleSubmit(e) {
@@ -13,9 +28,10 @@ function URLGetter() {
       const url = new URL(formData.get('url'));
       const showId = url.href.substring(url.href.lastIndexOf('/') + 1);
       setFeedback('Generating playlist...');
-      fetch('http://localhost:5000/api/' + showId, {
+      fetch('/api/' + showId, {
         method: 'POST'
-      });
+      }).then(response => response.json()
+        .then(data => console.log(data)));
     } catch (error) {
       setFeedback(
         'The URL provided is incorrectly formatted. Make sure it is formatted like this: ' +
@@ -43,10 +59,13 @@ function URLGetter() {
 function App() {
   return (
     <div className="App">
-      <div className='title'>
-        Soundify
+      <div className='main'>
+        <LogIn/>
+        <div className='title'>
+          Soundify
+        </div>
+        <URLGetter/>
       </div>
-      <URLGetter/>
     </div>
   );
 }
