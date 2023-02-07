@@ -2,14 +2,8 @@ import './App.css';
 import { useState } from 'react';
 
 function LogIn() {
-
-  function handleClick() {
-    fetch('/api/login');
-  }
-
   return (
     <div>
-      {/* <button className='round-green-button normalise-font' onClick={handleClick}>Connect to Spotify</button> */}
       <a href='/api/login' className='round-green-button normalise-font'>Connect to Spotify</a>
     </div>
   )

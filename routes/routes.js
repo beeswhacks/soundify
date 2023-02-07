@@ -32,32 +32,36 @@ router.get('/api/loginRedirect', (req, res) => {
     const code = req.query.code || null;
     const error  = req.query.error || null;
 
+    async function getAccessTokenResponse(code, redirect_uri, client_id, client_secret) {
+        try {
+            const response = await fetch('https://accounts.spotify.com/api/token?', {
+                method: 'POST',
+                body: querystring.stringify({
+                    code: code,
+                    redirect_uri: redirect_uri,
+                    grant_type: 'authorization_code'
+                }),
+                headers: {
+                    'Authorization': 'Basic ' + (Buffer.from(client_id + ':' + 
+                    client_secret)).toString('base64'),
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                json: true
+            });
+
+            const accessTokenResponse = await response.json();
+            console.log(accessTokenResponse);
+            return accessTokenResponse;
+        } catch (err) {
+            console.error(err);
+        }
+    } 
+
     if (responseState !== state) {
         throw new Error('State received in redirection URI does not match state ' +
         'provided to Spotify in authorisation URI.');
     } else {
-        fetch('https://accounts.spotify.com/api/token?', {
-            method: 'POST',
-            body: querystring.stringify({
-                code: code,
-                redirect_uri: redirect_uri,
-                grant_type: 'authorization_code'
-            }),
-            headers: {
-                'Authorization': 'Basic ' + (Buffer.from(client_id + ':' + 
-                client_secret)).toString('base64'),
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            json: true
-        }).then(res => res.json())
-            .then(data => {
-                console.log(data);
-                return data.access_token;
-            })
-            .then(access_token => {
-                res.redirect('/#' + querystring.stringify({access_token: access_token}))
-            })
-            .catch(err => console.error(err));
+        getAccessToken(code, redirect_uri, client_id, client_secret);
     }
 
     if (error !== null) {
