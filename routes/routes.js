@@ -4,6 +4,7 @@ var cors = require('cors');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const querystring = require('node:querystring');
+const axios = require('axios');
 
 const state = process.env.STATE || null;
 const redirect_uri = 'http://localhost:3000/api/loginRedirect';
@@ -26,7 +27,7 @@ router.get('/api/login', cors(), (req, res) => {
 });
 
 // Spotify API redirects here after login request has been handled
-router.get('/api/loginRedirect', (req, res) => {
+router.get('/api/loginRedirect', cors(), async (req, res) => {
 
     const responseState = req.query.state || null;
     const code = req.query.code || null;
@@ -34,26 +35,24 @@ router.get('/api/loginRedirect', (req, res) => {
 
     async function getAccessTokenResponse(code, redirect_uri, client_id, client_secret) {
         try {
-            const response = await fetch('https://accounts.spotify.com/api/token?', {
-                method: 'POST',
-                body: querystring.stringify({
+            const response = await axios({
+                url: 'https://accounts.spotify.com/api/token',
+                method: 'post',
+                data: {
                     code: code,
                     redirect_uri: redirect_uri,
                     grant_type: 'authorization_code'
-                }),
+                },
                 headers: {
                     'Authorization': 'Basic ' + (Buffer.from(client_id + ':' + 
                     client_secret)).toString('base64'),
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                json: true
             });
 
-            const accessTokenResponse = await response.json();
-            console.log(accessTokenResponse);
-            return accessTokenResponse;
+            return response;
         } catch (err) {
-            console.error(err);
+            console.error('Error getting access token: \n', err);
         }
     } 
 
@@ -61,7 +60,11 @@ router.get('/api/loginRedirect', (req, res) => {
         throw new Error('State received in redirection URI does not match state ' +
         'provided to Spotify in authorisation URI.');
     } else {
-        getAccessToken(code, redirect_uri, client_id, client_secret);
+        const accessTokenResponse = await getAccessTokenResponse(code, redirect_uri, client_id, client_secret);
+        res.cookie('access_token', accessTokenResponse.data.access_token, {
+            maxAge: accessTokenResponse.data.expires_in,
+            httpOnly: true,
+        }).redirect('/');
     }
 
     if (error !== null) {
