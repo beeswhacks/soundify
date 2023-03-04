@@ -24,8 +24,8 @@ function URLGetter() {
       setFeedback('Generating playlist...');
       fetch('/api/' + showId, {
         method: 'POST'
-      }).then(response => response.json()
-        .then(data => console.log(data)));
+      }).then(response => response.json())
+        .then(data => console.log(data));
     } catch (error) {
       setFeedback(
         'The URL provided is incorrectly formatted. Make sure it is formatted like this: ' +
