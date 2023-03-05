@@ -61,10 +61,18 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
         'provided to Spotify in authorisation URI.');
     } else {
         const accessTokenResponse = await getAccessTokenResponse(code, redirect_uri, client_id, client_secret);
-        res.cookie('access_token', accessTokenResponse.data.access_token, {
-            maxAge: accessTokenResponse.data.expires_in,
-            httpOnly: true,
-        }).redirect('/');
+        if (accessTokenResponse.data.access_token) {
+            res.cookie('access_token', accessTokenResponse.data.access_token, {
+                // expires_in gives expiration time in seconds, maxAge requires milliseconds
+                maxAge: accessTokenResponse.data.expires_in * 1000,
+                httpOnly: true,
+            }).cookie('access_token_granted', true, {
+                maxAge: accessTokenResponse.data.expires_in * 1000,
+            })
+            .redirect('/');
+        } else {
+            res.cookie('access_token_granted', false).redirect('/');
+        }
     }
 
     if (error !== null) {

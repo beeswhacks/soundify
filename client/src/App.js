@@ -1,10 +1,25 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 function LogIn() {
+  const [buttonText, setButtonText] = useState('Connect to Spotify');
+  const [accessTokenGranted, setAccessTokenGranted] = useState(false);
+  // setButtonText('Connect to Spotify');
+
+  useEffect(() => {
+    setAccessTokenGranted(Cookies.get('access_token_granted'));
+    
+    if (!accessTokenGranted) {
+      setButtonText('Connect to Spotify');
+    } else {
+      setButtonText('Connected to Spotify ✅');
+    }
+  }, [accessTokenGranted])
+
   return (
     <div>
-      <a href='/api/login' className='round-green-button normalise-font'>Connect to Spotify</a>
+      <a href='/api/login' className='round-green-button normalise-font'>{buttonText}</a>
     </div>
   )
 }
