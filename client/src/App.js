@@ -19,7 +19,7 @@ function LogIn({ accessTokenProp }) {
 
     return (
         <div>
-            <a href='/api/login' className='round-green-button normalise-font'>{buttonText}</a>
+            <a href='/api/login' className='round-button bg-green text-black normalise-font-size'>{buttonText}</a>
         </div>
     )
 }
@@ -52,13 +52,13 @@ function URLGetter() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <label className='light-font'>
+                <label className='text-white'>
                     Paste BBC sounds URL below:<br />
                     <input id='url' name='url' />
                 </label>
                 <button type='submit'>Get playlist</button>
             </form>
-            <div className='wrap-text light-font'>
+            <div className='wrap-text text-white'>
                 {feedback}
             </div>
         </>
@@ -67,7 +67,7 @@ function URLGetter() {
 
 function App() {
     return (
-        <div className="App">
+        <div className="App bg-black">
             <div className='main'>
                 <LogIn />
                 <div className='title'>

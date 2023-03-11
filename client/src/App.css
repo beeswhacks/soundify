@@ -3,17 +3,25 @@
   padding: 15% 10% 25% 10%;
 }
 
-html {
-  background-color: #252323;
+.bg-black {
+  background-color: #191414;
 }
 
-.light-font {
-  color: #D7CDCC;
+.bg-green {
+  background-color: #1ED760;
+}
+
+.text-black {
+  color: #191414;
+}
+
+.text-white {
+  color: #FFFFFF;
 }
 
 .title {
   margin: 0.8em auto auto auto;
-  color: #1ED760;
+  color: #1DB954;
   font-size: 5em;
 }
 
@@ -25,9 +33,7 @@ html {
   width: 22em;
 }
 
-.round-green-button {
-  background-color: #1ED760;
-  color: #252323;
+.round-button {
   border-radius: 2em;
   border: none;
   padding: 1em;
@@ -35,6 +41,6 @@ html {
   cursor: pointer;
 }
 
-.normalise-font {
+.normalise-font-size {
   font-size: 1em;
 }
