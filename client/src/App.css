@@ -3,6 +3,11 @@
   padding: 15% 10% 25% 10%;
 }
 
+.html, body {
+  background-color: #191414;
+  height: 100%;
+}
+
 .bg-black {
   background-color: #191414;
 }
