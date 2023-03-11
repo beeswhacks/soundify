@@ -19,4 +19,4 @@ Create a Spotify playlist from a tracklist on BBC Sounds.
 - [ ] Randomise state for Spotify authorisation
 - [ ] Implement refreshing of access token
 - [x] ~~Add indicator to show when user has connected to Spotify successfully~~
-- [ ] Show user's name when connected
+- [x] ~~Show user's name when connected~~
