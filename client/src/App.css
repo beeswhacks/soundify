@@ -8,7 +8,7 @@
 }
 
 .bg-green {
-  background-color: #1ED760;
+  background-color: #1DB954;
 }
 
 .text-black {
@@ -39,6 +39,12 @@
   padding: 1em;
   text-decoration: none;
   cursor: pointer;
+}
+
+.round-button:hover {
+  background-color: #1e8f46;
+  color: #191414;
+  text-decoration: none;
 }
 
 .normalise-font-size {
