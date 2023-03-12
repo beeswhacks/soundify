@@ -60,14 +60,15 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
     } else {
         const accessTokenResponse = await getAccessTokenResponse(code, redirect_uri, client_id, client_secret);
         if (accessTokenResponse.data.access_token) {
+            // expires_in gives expiration time in seconds, maxAge requires milliseconds
+            const maxCookieAgeInSeconds = accessTokenResponse.data.expires_in * 1000
             res.cookie('access_token', accessTokenResponse.data.access_token, {
-                    // expires_in gives expiration time in seconds, maxAge requires milliseconds
-                    maxAge: accessTokenResponse.data.expires_in * 1000,
+                    maxAge: maxCookieAgeInSeconds,
                 })
                 .cookie('access_token_granted', true, {
-                    maxAge: accessTokenResponse.data.expires_in * 1000,
+                    maxAge: maxCookieAgeInSeconds,
                 })
-                .redirect('/api/getUserInfo');
+                .redirect(`/api/getUserInfo/${maxCookieAgeInSeconds}`);
         } else {
             res.cookie('access_token_granted', false).redirect('/');
         }
@@ -78,7 +79,7 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
     }
 });
 
-router.get('/api/getUserInfo', cors(), async (req, res) => {
+router.get('/api/getUserInfo/:maxCookieAge', cors(), async (req, res) => {
     const access_token = req.cookies.access_token;
 
     if (!access_token) {
@@ -94,7 +95,10 @@ router.get('/api/getUserInfo', cors(), async (req, res) => {
             }
         });
         // res.json(userInfo);
-        res.cookie('user_name', userInfo.data.display_name).redirect('/');
+        res.cookie('user_name', userInfo.data.display_name, {
+            maxAge: req.params.maxCookieAge,
+        })
+            .redirect('/');
     }
 });
 
