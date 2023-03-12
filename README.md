@@ -1,5 +1,5 @@
 # soundify
-Create a Spotify playlist from a tracklist on BBC Sounds.  
+Create a Spotify playlist from a tracklist on BBC Sounds.
 
 # Cloning the repo
 1. Create a [Spotify developer](https://developer.spotify.com/) account.
@@ -13,10 +13,13 @@ Create a Spotify playlist from a tracklist on BBC Sounds.
 | `CLIENT_ID` | See the Spotify docs for the [authorisation code flow](https://developer.spotify.com/documentation/general/guides/authorization/code-flow/). This identifies you Spotify developer application. |
 | `CLIENT_SECRET` | See the Spotify docs for the [authorisation code flow](https://developer.spotify.com/documentation/general/guides/authorization/code-flow/). This is the key you use to authorise your requests to the Spotify API. |
 
-3. Create a `.env` file in the `/client` directory with a variable named `REACT_APP_SERVER_PORT`. The React app is set up to proxy requests to relative URLs it doesn't recognise to the server side. This tells the proxy which port your server is running on. 
+3. Create a `.env` file in the `/client` directory with a variable named `REACT_APP_SERVER_PORT`. The React app is set up to proxy requests to relative URLs it doesn't recognise to the server side. This tells the proxy which port your server is running on.
 
 # TODO
 - [ ] Randomise state for Spotify authorisation
 - [ ] Implement refreshing of access token
 - [x] ~~Add indicator to show when user has connected to Spotify successfully~~
 - [x] ~~Show user's name when connected~~
+- [ ] Add hyperlink to returned playlist
+- [ ] Handle playlist already existing properly
+- [ ] Improve UI
