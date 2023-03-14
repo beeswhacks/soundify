@@ -33,6 +33,8 @@ function URLGetter() {
         const form = e.target;
         const formData = new FormData(form);
 
+        Cookies.remove('playlist_url');
+
         if (!Cookies.get('access_token_granted')) {
             setFeedback('It looks like you\'re not connected to Spotify. Connect to Spotify and try again.' );
         } else {
@@ -47,6 +49,8 @@ function URLGetter() {
                 .then(response => {
                     if (response.ok && Cookies.get('playlist_url')) {
                         setFeedback('Done! Here\'s your playlist: ' + Cookies.get('playlist_url'));
+                    } else if (Cookies.get('playlist_already_exists')) {
+                        setFeedback('It looks like a playlist already exists for this show. Go and enjoy it!')
                     } else {
                         setFeedback('Unable to generate playlist. Please make sure that: the URL points to a real BBC Sounds show, that the show has a tracklist, and that the URL is formatted like: https://www.bbc.co.uk/sounds/play/<showId>')
                     }

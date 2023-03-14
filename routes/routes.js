@@ -208,6 +208,10 @@ router.post('/api/:showId', cors(), async (req, res) => {
         res
         .cookie('playlist_url', newPlaylist.data.external_urls.spotify)
         .redirect('/');
+    } else {
+        res
+        .cookie('playlist_already_exists', true)
+        .redirect('/');
     }
 });
 
