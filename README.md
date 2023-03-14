@@ -21,5 +21,5 @@ Create a Spotify playlist from a tracklist on BBC Sounds.
 - [x] ~~Add indicator to show when user has connected to Spotify successfully~~
 - [x] ~~Show user's name when connected~~
 - [ ] Add hyperlink to returned playlist
-- [ ] Handle playlist already existing properly
-- [ ] Improve UI
+- [x] ~~Handle playlist already existing properly~~
+- [x] ~~Improve UI~~
