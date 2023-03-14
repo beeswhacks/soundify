@@ -73,7 +73,7 @@ function URLGetter() {
                     Paste BBC sounds URL below:<br />
                     <input id='url' name='url' />
                 </label>
-                <button type='submit'>Get playlist</button>
+                <button type='submit' id='submit-button'>Get playlist</button>
             </form>
             <div className='wrap-text text-white'>
                 {feedback}
