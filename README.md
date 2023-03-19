@@ -20,6 +20,6 @@ Create a Spotify playlist from a tracklist on BBC Sounds.
 - [ ] Implement refreshing of access token
 - [x] ~~Add indicator to show when user has connected to Spotify successfully~~
 - [x] ~~Show user's name when connected~~
-- [ ] Add hyperlink to returned playlist
+- [ ] Add proper link to Spotfy playlist (including playlist image)
 - [x] ~~Handle playlist already existing properly~~
 - [x] ~~Improve UI~~
