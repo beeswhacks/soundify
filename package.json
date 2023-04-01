@@ -14,6 +14,7 @@
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
     "jsdom": "^21.1.0",
+    "lodash": "^4.17.21",
     "morgan": "~1.9.1"
   },
   "devDependencies": {
