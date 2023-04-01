@@ -205,13 +205,22 @@ router.post('/api/:showId', cors(), async (req, res) => {
             }
         });
 
-        res
-        .cookie('playlist_url', newPlaylist.data.external_urls.spotify)
-        .redirect('/');
+        res.json({
+            isCreated: true,
+            url: newPlaylist.data.external_urls.spotify,
+            name: newPlaylist.data.name,
+            images: newPlaylist.data.images,
+        })
     } else {
-        res
-        .cookie('playlist_already_exists', true)
-        .redirect('/');
+        // if the playlist already exists, return info to the user
+        const matchingPlaylist = userPlaylists.data.items.find(playlist => playlist.name == playlistName);
+
+        res.json({
+            isCreated: false,
+            url: matchingPlaylist.external_urls.spotify,
+            name: matchingPlaylist.name,
+            images: matchingPlaylist.images,
+        })
     }
 });
 

@@ -1,8 +1,10 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { isEmpty } from 'lodash';
+import spotifyIcon from  './Spotify_Icon_RGB_Green.png';
 
-function LogIn({ accessTokenProp }) {
+function LogIn() {
     const [buttonText, setButtonText] = useState('Connect to Spotify');
     const [hasAccessToken, setHasAccessToken] = useState('');
 
@@ -19,14 +21,47 @@ function LogIn({ accessTokenProp }) {
 
     return (
         <div>
-            <a href='/api/login' className='round-button bg-green text-black normalise-font-size'>{buttonText}</a>
+            <a href='/api/login' className='round-button bg-green text-black normalise-font-size'>
+                {buttonText}
+            </a>
         </div>
     )
 }
 
-function URLGetter() {
+const showPlaylist = (options) => {
+    const { name, url, image } = options;
 
-    const [feedback, setFeedback] = useState('');
+    return (
+        <a className='text-white playlist' href={url}>
+            <span>
+                <img alt='playlist artwork' width='125' height='125' src={image} />
+            </span>
+            <span className='text-white' style={{ textDecoration: 'none', margin: '10px' }}>
+                {name}
+            </span>
+        </a>
+    )
+}
+
+function CreatePlaylist() {
+    const [status, setStatus] = useState('');
+
+    let feedbackText = '';
+
+    if (status === 'notConnected') {
+        feedbackText = 'It looks like you\'re not connected to Spotify. Connect to Spotify and try again.'
+    }
+    else if (status === 'generatingPlaylist') {
+        feedbackText = 'Generating playlist...';
+    } else if (status === 'playlistExists') {
+        feedbackText = 'It looks like a playlist already exists for this show:';
+    } else if (status === 'playlistCreated') {
+        feedbackText = 'Done! Here\'s your playlist:';
+    } else if (status === 'errorCreatingPlaylist') {
+        feedbackText = 'Unable to generate playlist. Please make sure that: the URL points to a real BBC Sounds show, that the show has a tracklist, and that the URL is formatted like: https://www.bbc.co.uk/sounds/play/<showId>';
+    } else if (status === 'badUrl') {
+        feedbackText = 'The URL provided is incorrectly formatted. Make sure it is formatted like this: https://www.bbc.co.uk/sounds/play/<showId>';
+    }
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -36,34 +71,33 @@ function URLGetter() {
         Cookies.remove('playlist_url');
 
         if (!Cookies.get('access_token_granted')) {
-            setFeedback('It looks like you\'re not connected to Spotify. Connect to Spotify and try again.' );
+            setStatus('notConnected');
         } else {
             try {
                 const url = new URL(formData.get('url'));
                 const showId = url.href.substring(url.href.lastIndexOf('/') + 1);
-                setFeedback('Generating playlist...');
+                setStatus('generatingPlaylist');
 
                 fetch('/api/' + showId, {
                     method: 'POST'
                 })
-                .then(response => {
-                    if (response.ok && Cookies.get('playlist_url')) {
-                        setFeedback('Done! Here\'s your playlist: ' + Cookies.get('playlist_url'));
-                    } else if (Cookies.get('playlist_already_exists')) {
-                        setFeedback('It looks like a playlist already exists for this show. Go and enjoy it!')
-                    } else {
-                        setFeedback('Unable to generate playlist. Please make sure that: the URL points to a real BBC Sounds show, that the show has a tracklist, and that the URL is formatted like: https://www.bbc.co.uk/sounds/play/<showId>')
-                    }
-                })
-                .then(data => console.log(data));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (Object.hasOwn(data, 'isCreated')) {
+                            data.isCreated ? setStatus('playlistCreated') : setStatus('playlistExists');
+                            sessionStorage.setItem('playlistName', String(data.name));
+                            sessionStorage.setItem('playlistUrl', data.url);
+                            sessionStorage.setItem('playlistImage', isEmpty(data.images) ? spotifyIcon : data.images[1].url);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        setStatus('errorCreatingPlaylist');
+                    })
             } catch (error) {
-                setFeedback(
-                    'The URL provided is incorrectly formatted. Make sure it is formatted like this: ' +
-                    'https://www.bbc.co.uk/sounds/play/<showId>'
-                )
+                setStatus('badUrl');
             }
         }
-
     }
 
     return (
@@ -76,8 +110,13 @@ function URLGetter() {
                 <button type='submit' id='submit-button'>Get playlist</button>
             </form>
             <div className='wrap-text text-white'>
-                {feedback}
+                {feedbackText}
             </div>
+            {(status === 'playlistCreated' || status === 'playlistExists') && showPlaylist({
+                name: sessionStorage.getItem('playlistName'),
+                url: sessionStorage.getItem('playlistUrl'),
+                image: sessionStorage.getItem('playlistImage'),
+            })}
         </>
     )
 }
@@ -90,7 +129,7 @@ function App() {
                 <div className='title'>
                     Soundify
                 </div>
-                <URLGetter />
+                <CreatePlaylist />
             </div>
         </div>
     );

@@ -71,3 +71,20 @@
 .normalise-font-size {
   font-size: 1em;
 }
+
+.playlist {
+  background-color: #322c2c;
+  border: 3px solid #322c2c;
+  align-items: center;
+  border-radius: 20px;
+  display: flex;
+  text-decoration: none;
+  justify-content: space-evenly;
+  margin: 20px auto;
+  padding: 20px 10px;
+  width: 400px;
+}
+
+.playlist:hover {
+  border: 3px solid #1DB954;
+}
