@@ -27,6 +27,23 @@ function getUserInfo(access_token) {
     );
 }
 
+const makeSpotifyApiCall = (access_token, options) => {
+    const {method, url, ...otherOptions} = options;
+
+    return (
+        axios({
+            baseURL: spotify_api_base_url,
+            headers: {
+                'Authorization': 'Bearer ' + access_token,
+                'Content-Type': 'application/json',
+            },
+            method,
+            url,
+            ...otherOptions,
+        })
+    )
+}
+
 // authorise user through Spotify API
 router.get('/api/login', cors(), (req, res) => {
     const scope = 'user-read-private user-read-email playlist-read-private playlist-modify-private playlist-modify-public';
@@ -161,58 +178,37 @@ router.post('/api/:showId', cors(), async (req, res) => {
     const spotifyUserId = userInfo.data.id;
 
     // check if user already has playlist for the show
-    const userPlaylists = await axios({
-        baseURL: spotify_api_base_url,
-        url: '/me/playlists',
+    const userPlaylists = await makeSpotifyApiCall(access_token, {
         method: 'get',
-        headers: {
-            'Authorization': 'Bearer ' + access_token,
-            'Content-Type': 'application/json',
-        },
-    });
+        url: '/me/playlists',
+    })
 
     const matchingPlaylists = userPlaylists.data.items.some(playlist => playlist.name == playlistName);
 
     // create spotify playlist from bbc sounds tracklist
     if (matchingPlaylists === false) {
-        const newPlaylist = await axios({
-            baseURL: spotify_api_base_url,
-            url: `/users/${spotifyUserId}/playlists`,
+        const newPlaylist = await makeSpotifyApiCall(access_token, {
             method: 'post',
-            headers: {
-                'Authorization': 'Bearer ' + access_token,
-                'Content-Type': 'application/json',
-            },
+            url: `/users/${spotifyUserId}/playlists`,
             data: {
                 "name": playlistName,
                 "description": "Auto-generated using Soundify",
                 "public": false,
             }
-        });
+        })
 
-        // add songs to playlist
-        const addTracksToPlaylist = await axios({
-            baseURL: spotify_api_base_url,
+        const addTracksToPlaylist = await makeSpotifyApiCall(access_token, {
             url: `/playlists/${newPlaylist.data.id}/tracks`,
             method: 'post',
-            headers: {
-                'Authorization': 'Bearer ' + access_token,
-                'Content-Type': 'application/json',
-            },
             data: {
                 "uris": spotifyUris,
                 "position": 0,
             }
-        });
+        })
 
-        const newPlaylistImage = await axios({
-            baseURL: spotify_api_base_url,
+        const newPlaylistImage = await makeSpotifyApiCall(access_token, {
             url: `playlists/${newPlaylist.data.id}/images`,
             method: 'get',
-            headers: {
-                'Authorization': 'Bearer ' + access_token,
-                'Content-Type': 'application/json',
-            },
         })
 
         res.json({
