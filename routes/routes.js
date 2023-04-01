@@ -205,11 +205,21 @@ router.post('/api/:showId', cors(), async (req, res) => {
             }
         });
 
+        const newPlaylistImage = await axios({
+            baseURL: spotify_api_base_url,
+            url: `playlists/${newPlaylist.data.id}/images`,
+            method: 'get',
+            headers: {
+                'Authorization': 'Bearer ' + access_token,
+                'Content-Type': 'application/json',
+            },
+        })
+
         res.json({
             isCreated: true,
             url: newPlaylist.data.external_urls.spotify,
             name: newPlaylist.data.name,
-            images: newPlaylist.data.images,
+            images: newPlaylistImage.data,
         })
     } else {
         // if the playlist already exists, return info to the user
