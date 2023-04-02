@@ -66,7 +66,7 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
     const code = req.query.code || null;
     const error = req.query.error || null;
 
-    async function getAccessTokenResponse(code, redirect_uri, client_id, client_secret) {
+    async function getAccessToken(code, redirect_uri, client_id, client_secret) {
         const response = await axios({
             baseURL: spotify_accounts_base_url,
             url: '/api/token',
@@ -82,18 +82,26 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
         });
-        return response;
+        return {
+            accessToken: response.data.access_token,
+            tokenExpiresIn: response.data.expires_in,
+        }
     }
 
     if (responseState !== state) {
         throw new Error('State received in redirection URI does not match state ' +
             'provided to Spotify in authorisation URI.');
     } else {
-        const accessTokenResponse = await getAccessTokenResponse(code, redirect_uri, client_id, client_secret);
-        if (accessTokenResponse.data.access_token) {
+        const { accessToken, tokenExpiresIn } = await getAccessToken(
+            code,
+            redirect_uri,
+            client_id,
+            client_secret);
+
+        if (accessToken) {
             // expires_in gives expiration time in seconds, maxAge requires milliseconds
-            const maxCookieAgeInSeconds = accessTokenResponse.data.expires_in * 1000
-            res.cookie('access_token', accessTokenResponse.data.access_token, {
+            const maxCookieAgeInSeconds = tokenExpiresIn * 1000
+            res.cookie('access_token', accessToken, {
                     maxAge: maxCookieAgeInSeconds,
                 })
                 .cookie('access_token_granted', true, {
