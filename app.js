@@ -10,5 +10,5 @@ app.use(morgan('tiny'));
 app.use(cookieParser());
 app.listen(PORT);
 
-const routes = require('./routes/routes.js')
+const routes = require('./routes.js')
 app.use(routes);

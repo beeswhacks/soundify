@@ -5,6 +5,8 @@ const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const querystring = require('node:querystring');
 const axios = require('axios');
+const { get } = require('lodash');
+const getAccessToken = require('./services/getAccessToken');
 
 const state = process.env.STATE || null;
 const redirect_uri = 'http://localhost:3000/api/loginRedirect';
@@ -62,37 +64,16 @@ router.get('/api/login', cors(), (req, res) => {
 // Spotify API redirects here after user has logged in
 router.get('/api/loginRedirect', cors(), async (req, res) => {
 
-    const responseState = req.query.state || null;
-    const code = req.query.code || null;
-    const error = req.query.error || null;
-
-    async function getAccessToken(code, redirect_uri, client_id, client_secret) {
-        const response = await axios({
-            baseURL: spotify_accounts_base_url,
-            url: '/api/token',
-            method: 'post',
-            data: {
-                code: code,
-                redirect_uri: redirect_uri,
-                grant_type: 'authorization_code'
-            },
-            headers: {
-                'Authorization': 'Basic ' + (Buffer.from(client_id + ':' +
-                    client_secret)).toString('base64'),
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-        });
-        return {
-            accessToken: response.data.access_token,
-            tokenExpiresIn: response.data.expires_in,
-        }
-    }
+    const responseState = get(req, 'query.state');
+    const code = get(req, 'query.code');
+    const error = get(req, 'query.error');
 
     if (responseState !== state) {
         throw new Error('State received in redirection URI does not match state ' +
             'provided to Spotify in authorisation URI.');
     } else {
         const { accessToken, tokenExpiresIn } = await getAccessToken(
+            spotify_accounts_base_url,
             code,
             redirect_uri,
             client_id,
