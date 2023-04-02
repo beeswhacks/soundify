@@ -6,7 +6,10 @@ const { JSDOM } = jsdom;
 const querystring = require('node:querystring');
 const axios = require('axios');
 const { get } = require('lodash');
+
 const getAccessToken = require('./services/getAccessToken');
+const getUserInfo = require('./services/getUserInfo');
+const getTracklist = require('./services/getShowInfo');
 
 const state = process.env.STATE || null;
 const redirect_uri = 'http://localhost:3000/api/loginRedirect';
@@ -14,20 +17,6 @@ const client_id = process.env.CLIENT_ID || null;
 const client_secret = process.env.CLIENT_SECRET || null;
 const spotify_accounts_base_url = 'https://accounts.spotify.com/';
 const spotify_api_base_url = 'https://api.spotify.com/v1/';
-
-function getUserInfo(access_token) {
-    return (
-        axios({
-            baseURL: spotify_api_base_url,
-            url: '/me',
-            method: 'get',
-            headers: {
-                'Authorization': 'Bearer ' + access_token,
-                'Content-Type': 'application/json',
-            },
-        })
-    );
-}
 
 const makeSpotifyApiCall = (access_token, options) => {
     const {method, url, ...otherOptions} = options;
@@ -116,54 +105,34 @@ router.get('/api/getUserName/:maxCookieAge', cors(), async (req, res) => {
 router.post('/api/:showId', cors(), async (req, res) => {
     const access_token = req.cookies.access_token;
 
-    // let tracklist;
+    // ----------------------------------------------------------------
+    //              EXTRACT TRACKLIST FROM BBC SOUNDS
+    // ----------------------------------------------------------------
+
     const url = 'https://www.bbc.co.uk/sounds/play/' + req.params.showId;
 
     // scrape data from BBC Sounds
-    const bbcSoundsData = await JSDOM
-        .fromURL(url, { resources: 'usable' })
-        .then(dom => {
-            const scripts = dom.window.document.querySelectorAll('body script');
-            const searchText = 'window.__PRELOADED_STATE__ = '
-            // look for searchText in each script
-            var isolatedScript = '';
-            scripts.forEach(script => {
-                const trimmedScript = script.text.trim();
-                if (trimmedScript.slice(0, searchText.length) === searchText) {
-                    return isolatedScript = trimmedScript.slice(searchText.length, -1);
-                }
-            });
-            return isolatedScript;
-        })
-        .then(isolatedScript => {
-            scriptJSON = JSON.parse(isolatedScript);
-            return scriptJSON;
-        });
+    const { tracklist, playlistName } = await getTracklist(url);
 
-    const tracklist = bbcSoundsData.tracklist.tracks;
-
-    // each track has a set of URIs pointing to the track on apple music and/or spotify
-    // go through the URIs for each track and only return spotify URIs
+    // pick out links to Spotify tracks
     const spotifyUriObjects = tracklist.flatMap(track => {
         return track.uris.filter(uri => uri.id === 'commercial-music-service-spotify');
     });
 
-    // each uri is a link of the form https://open.spotify.com/track/<spotifyId>
-    // create new URL object for each uri and extract the last section of the href to get spotifyId
-    // the spotifyId identifies the spotify track so can be used to find the song and add it to a playlist
+    // links are of the form https://open.spotify.com/track/<spotifyId>
+    // extract spotifyIds from links
     const spotifyUris = spotifyUriObjects.flatMap(uriObj => {
         const uri = new URL(uriObj.uri);
         const spotifyId = uri.href.substring(uri.href.lastIndexOf('/') + 1);
         return 'spotify:track:' + spotifyId;
     })
 
-    // extract show title and release date for Spotify playlist title
-    const showTitle = bbcSoundsData.modules.data[0].data[0].titles.primary;
-    const releaseDate = new Date(bbcSoundsData.modules.data[0].data[0].release.date);
-    const playlistName = showTitle + ' - ' + releaseDate.toDateString();
+    // ----------------------------------------------------------------
+    //                   CREATE SPOTIFY PLAYLIST
+    // ----------------------------------------------------------------
 
     // get user's Spotify user_id
-    const userInfo = await getUserInfo(access_token);
+    const userInfo = await getUserInfo(spotify_api_base_url, access_token);
     const spotifyUserId = userInfo.data.id;
 
     // check if user already has playlist for the show
@@ -172,10 +141,10 @@ router.post('/api/:showId', cors(), async (req, res) => {
         url: '/me/playlists',
     })
 
-    const matchingPlaylists = userPlaylists.data.items.some(playlist => playlist.name == playlistName);
+    const matchingPlaylist = userPlaylists.data.items.some(playlist => playlist.name == playlistName);
 
     // create spotify playlist from bbc sounds tracklist
-    if (matchingPlaylists === false) {
+    if (!matchingPlaylist) {
         const newPlaylist = await makeSpotifyApiCall(access_token, {
             method: 'post',
             url: `/users/${spotifyUserId}/playlists`,
@@ -187,8 +156,8 @@ router.post('/api/:showId', cors(), async (req, res) => {
         })
 
         const addTracksToPlaylist = await makeSpotifyApiCall(access_token, {
-            url: `/playlists/${newPlaylist.data.id}/tracks`,
             method: 'post',
+            url: `/playlists/${newPlaylist.data.id}/tracks`,
             data: {
                 "uris": spotifyUris,
                 "position": 0,
@@ -196,8 +165,8 @@ router.post('/api/:showId', cors(), async (req, res) => {
         })
 
         const newPlaylistImage = await makeSpotifyApiCall(access_token, {
-            url: `playlists/${newPlaylist.data.id}/images`,
             method: 'get',
+            url: `playlists/${newPlaylist.data.id}/images`,
         })
 
         res.json({
