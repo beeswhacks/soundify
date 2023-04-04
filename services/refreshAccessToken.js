@@ -1,33 +1,31 @@
 const axios = require('axios');
+const expiresAt = require('./expiresAt');
 
-async function getAccessToken(
+const refreshAccessToken = async (
     baseUrl,
-    authCode,
-    redirectUri,
+    refreshToken,
     clientId,
     clientSecret
-) {
+) => {
     const response = await axios({
-        baseURL: baseUrl,
-        url: '/api/token',
+        url: `${baseUrl}api/token`,
         method: 'post',
-        data: {
-            code: authCode,
-            redirect_uri: redirectUri,
-            grant_type: 'authorization_code',
-        },
         headers: {
             Authorization:
                 'Basic ' +
                 Buffer.from(clientId + ':' + clientSecret).toString('base64'),
             'Content-Type': 'application/x-www-form-urlencoded',
         },
+        data: {
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+        },
     });
+
     return {
         accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token,
-        tokenExpiresIn: response.data.expires_in,
+        expiresAt: expiresAt(response.data.expires_in),
     };
-}
+};
 
-module.exports = getAccessToken;
+module.exports = refreshAccessToken;

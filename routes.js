@@ -8,10 +8,12 @@ const axios = require('axios');
 const { get } = require('lodash');
 const randomstring = require('randomstring');
 
+const expiresAt = require('./services/expiresAt');
 const getAccessToken = require('./services/getAccessToken');
 const getUserInfo = require('./services/getUserInfo');
 const getTracklist = require('./services/getShowInfo');
 const makeSpotifyApiCall = require('./services/makeSpotifyApiCall');
+const lookUpAccessToken = require('./services/lookUpAccessToken');
 
 const Users = require('./models/User');
 
@@ -52,13 +54,14 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
             'State received in redirection URI does not match state provided to Spotify in authorisation URI.'
         );
     } else {
-        const { accessToken, tokenExpiresIn } = await getAccessToken(
-            spotifyAccountsBaseUrl,
-            code,
-            redirectUri,
-            clientId,
-            clientSecret
-        );
+        const { accessToken, refreshToken, tokenExpiresIn } =
+            await getAccessToken(
+                spotifyAccountsBaseUrl,
+                code,
+                redirectUri,
+                clientId,
+                clientSecret
+            );
 
         if (accessToken) {
             const sessionId = randomstring.generate();
@@ -66,7 +69,8 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
                 userName: '',
                 sessionId,
                 accessToken,
-                expiresAt: new Date(Date.now() + tokenExpiresIn),
+                refreshToken,
+                expiresAt: expiresAt(tokenExpiresIn),
             });
             res.cookie('sessionId', sessionId).redirect(`/api/getUserName`);
         } else {
@@ -82,10 +86,12 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
 router.get('/api/getUserName', cors(), async (req, res) => {
     const sessionId = req.cookies.sessionId;
 
-    const { accessToken } = await Users.findOne(
-        { sessionId },
-        'accessToken'
-    ).lean();
+    const accessToken = await lookUpAccessToken(
+        sessionId,
+        spotifyAccountsBaseUrl,
+        clientId,
+        clientSecret
+    );
 
     if (!accessToken) {
         res.status(500).send('Access token not found.');
@@ -107,10 +113,12 @@ router.get('/api/getUserName', cors(), async (req, res) => {
 router.post('/api/:showId', cors(), async (req, res) => {
     const sessionId = req.cookies.sessionId;
 
-    const { accessToken } = await Users.findOne(
-        { sessionId },
-        'accessToken'
-    ).lean();
+    const accessToken = await lookUpAccessToken(
+        sessionId,
+        spotifyAccountsBaseUrl,
+        clientId,
+        clientSecret
+    );
 
     // ----------------------------------------------------------------
     //              EXTRACT TRACKLIST FROM BBC SOUNDS

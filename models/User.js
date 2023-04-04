@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
     userName: String,
     sessionId: String,
     accessToken: String,
+    refreshToken: String,
     expiresAt: Date,
 });
 
