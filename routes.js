@@ -15,7 +15,7 @@ const makeSpotifyApiCall = require('./services/makeSpotifyApiCall');
 
 const Users = require('./models/User');
 
-const state = process.env.STATE || null;
+const state = randomstring.generate();
 const redirectUri = 'http://localhost:3000/api/loginRedirect';
 const clientId = process.env.CLIENT_ID || null;
 const clientSecret = process.env.CLIENT_SECRET || null;
