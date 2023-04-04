@@ -6,18 +6,21 @@ const { JSDOM } = jsdom;
 const querystring = require('node:querystring');
 const axios = require('axios');
 const { get } = require('lodash');
+const randomstring = require('randomstring');
 
 const getAccessToken = require('./services/getAccessToken');
 const getUserInfo = require('./services/getUserInfo');
 const getTracklist = require('./services/getShowInfo');
 const makeSpotifyApiCall = require('./services/makeSpotifyApiCall');
 
+const Users = require('./models/User');
+
 const state = process.env.STATE || null;
-const redirect_uri = 'http://localhost:3000/api/loginRedirect';
-const client_id = process.env.CLIENT_ID || null;
-const client_secret = process.env.CLIENT_SECRET || null;
-const spotify_accounts_base_url = 'https://accounts.spotify.com/';
-const spotify_api_base_url = 'https://api.spotify.com/v1/';
+const redirectUri = 'http://localhost:3000/api/loginRedirect';
+const clientId = process.env.CLIENT_ID || null;
+const clientSecret = process.env.CLIENT_SECRET || null;
+const spotifyAccountsBaseUrl = 'https://accounts.spotify.com/';
+const spotifyApiBaseUrl = 'https://api.spotify.com/v1/';
 
 // authorise user through Spotify API
 router.get('/api/login', cors(), (req, res) => {
@@ -26,13 +29,13 @@ router.get('/api/login', cors(), (req, res) => {
 
     // redirect login request to Spotify API
     res.redirect(
-        spotify_accounts_base_url +
+        spotifyAccountsBaseUrl +
             'authorize?' +
             querystring.stringify({
                 response_type: 'code',
-                client_id: client_id,
+                client_id: clientId,
                 scope: scope,
-                redirect_uri: redirect_uri,
+                redirect_uri: redirectUri,
                 state: state,
             })
     );
@@ -50,25 +53,24 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
         );
     } else {
         const { accessToken, tokenExpiresIn } = await getAccessToken(
-            spotify_accounts_base_url,
+            spotifyAccountsBaseUrl,
             code,
-            redirect_uri,
-            client_id,
-            client_secret
+            redirectUri,
+            clientId,
+            clientSecret
         );
 
         if (accessToken) {
-            // expires_in gives expiration time in seconds, maxAge requires milliseconds
-            const maxCookieAgeInSeconds = tokenExpiresIn * 1000;
-            res.cookie('access_token', accessToken, {
-                maxAge: maxCookieAgeInSeconds,
-            })
-                .cookie('access_token_granted', true, {
-                    maxAge: maxCookieAgeInSeconds,
-                })
-                .redirect(`/api/getUserName/${maxCookieAgeInSeconds}`);
+            const sessionId = randomstring.generate();
+            await Users.create({
+                userName: '',
+                sessionId,
+                accessToken,
+                expiresAt: new Date(Date.now() + tokenExpiresIn),
+            });
+            res.cookie('sessionId', sessionId).redirect(`/api/getUserName`);
         } else {
-            res.cookie('access_token_granted', false).redirect('/');
+            res.cookie('sessionId', false).redirect('/');
         }
     }
 
@@ -77,23 +79,38 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
     }
 });
 
-router.get('/api/getUserName/:maxCookieAge', cors(), async (req, res) => {
-    const access_token = req.cookies.access_token;
+router.get('/api/getUserName', cors(), async (req, res) => {
+    const sessionId = req.cookies.sessionId;
 
-    if (!access_token) {
-        res.status(500).send(
-            'An access token is required to get user info but none was provided.'
-        );
+    const { accessToken } = await Users.findOne(
+        { sessionId },
+        'accessToken'
+    ).lean();
+
+    if (!accessToken) {
+        res.status(500).send('Access token not found.');
     } else {
-        const userInfo = await getUserInfo(spotify_api_base_url, access_token);
-        res.cookie('user_name', userInfo.data.display_name, {
-            maxAge: req.params.maxCookieAge,
-        }).redirect('/');
+        const userInfo = await getUserInfo(spotifyApiBaseUrl, accessToken);
+        const userName = userInfo.data.display_name;
+
+        const user = await Users.findOne({
+            sessionId,
+        }).exec();
+
+        user.userName = userName;
+        await user.save();
+
+        res.cookie('user_name', userName).redirect('/');
     }
 });
 
 router.post('/api/:showId', cors(), async (req, res) => {
-    const access_token = req.cookies.access_token;
+    const sessionId = req.cookies.sessionId;
+
+    const { accessToken } = await Users.findOne(
+        { sessionId },
+        'accessToken'
+    ).lean();
 
     // ----------------------------------------------------------------
     //              EXTRACT TRACKLIST FROM BBC SOUNDS
@@ -124,13 +141,13 @@ router.post('/api/:showId', cors(), async (req, res) => {
     // ----------------------------------------------------------------
 
     // get user's Spotify user_id
-    const userInfo = await getUserInfo(spotify_api_base_url, access_token);
+    const userInfo = await getUserInfo(spotifyApiBaseUrl, accessToken);
     const spotifyUserId = userInfo.data.id;
 
     // check if user already has playlist for the show
     const userPlaylists = await makeSpotifyApiCall(
-        spotify_api_base_url,
-        access_token,
+        spotifyApiBaseUrl,
+        accessToken,
         {
             method: 'get',
             url: '/me/playlists',
@@ -144,8 +161,8 @@ router.post('/api/:showId', cors(), async (req, res) => {
     // create spotify playlist from bbc sounds tracklist
     if (!matchingPlaylist) {
         const newPlaylist = await makeSpotifyApiCall(
-            spotify_api_base_url,
-            access_token,
+            spotifyApiBaseUrl,
+            accessToken,
             {
                 method: 'post',
                 url: `/users/${spotifyUserId}/playlists`,
@@ -158,8 +175,8 @@ router.post('/api/:showId', cors(), async (req, res) => {
         );
 
         const addTracksToPlaylist = await makeSpotifyApiCall(
-            spotify_api_base_url,
-            access_token,
+            spotifyApiBaseUrl,
+            accessToken,
             {
                 method: 'post',
                 url: `/playlists/${newPlaylist.data.id}/tracks`,
@@ -171,8 +188,8 @@ router.post('/api/:showId', cors(), async (req, res) => {
         );
 
         const newPlaylistImage = await makeSpotifyApiCall(
-            spotify_api_base_url,
-            access_token,
+            spotifyApiBaseUrl,
+            accessToken,
             {
                 method: 'get',
                 url: `playlists/${newPlaylist.data.id}/images`,

@@ -1,23 +1,17 @@
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Cookies from 'js-cookie';
 import { isEmpty } from 'lodash';
 import spotifyIcon from './Spotify_Icon_RGB_Green.png';
 
 function LogIn() {
-    const [buttonText, setButtonText] = useState('Connect to Spotify');
-    const [hasAccessToken, setHasAccessToken] = useState('');
+    let buttonText = 'Connect to Spotify';
+    const hasSessionId = Cookies.get('sessionId');
 
-    useEffect(() => {
-        setHasAccessToken(Cookies.get('access_token_granted'));
-
-        if (hasAccessToken) {
-            const userName = Cookies.get('user_name');
-            setButtonText(`Connected as ${userName}`);
-        } else {
-            setButtonText('Connect to Spotify');
-        }
-    }, [hasAccessToken]);
+    if (hasSessionId) {
+        const userName = Cookies.get('user_name');
+        buttonText = `Connected as ${userName}`;
+    }
 
     return (
         <div>
@@ -83,7 +77,7 @@ function CreatePlaylist() {
 
         Cookies.remove('playlist_url');
 
-        if (!Cookies.get('access_token_granted')) {
+        if (!Cookies.get('sessionId')) {
             setStatus('notConnected');
         } else {
             try {
