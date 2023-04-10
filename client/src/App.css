@@ -88,3 +88,11 @@
 .playlist:hover {
   border: 2px solid #FFFFFF;
 }
+
+.footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 5px;
+}
