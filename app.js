@@ -12,7 +12,7 @@ app.use(cookieParser());
 app.listen(PORT);
 
 mongoose
-    .connect('mongodb://localhost:27017')
+    .connect(process.env.MONGODB_URI)
     .then(console.log('Connected to MongoDB.'));
 
 const routes = require('./routes.js');
