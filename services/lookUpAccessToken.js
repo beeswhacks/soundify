@@ -1,4 +1,4 @@
-const Users = require('../models/User');
+const User = require('../models/User');
 const refreshAccessToken = require('./refreshAccessToken');
 
 const lookUpAccessToken = async (
@@ -7,7 +7,7 @@ const lookUpAccessToken = async (
     clientId,
     clientSecret
 ) => {
-    const user = await Users.findOne({
+    const user = await User.findOne({
         sessionId,
     }).exec();
 

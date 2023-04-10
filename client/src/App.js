@@ -6,9 +6,9 @@ import spotifyIcon from './Spotify_Icon_RGB_Green.png';
 
 function LogIn() {
     let buttonText = 'Connect to Spotify';
-    const hasSessionId = Cookies.get('sessionId');
+    const sessionId = Cookies.get('sessionId');
 
-    if (hasSessionId) {
+    if (sessionId) {
         const userName = Cookies.get('user_name');
         buttonText = `Connected as ${userName}`;
     }
@@ -33,8 +33,8 @@ const showPlaylist = (options) => {
             <span>
                 <img
                     alt="playlist artwork"
-                    width="125"
-                    height="125"
+                    width="75"
+                    height="75"
                     src={image}
                 />
             </span>
@@ -123,7 +123,7 @@ function CreatePlaylist() {
         <>
             <form onSubmit={handleSubmit}>
                 <label className="text-white">
-                    Paste BBC sounds URL below:
+                    Paste a BBC sounds URL below:
                     <br />
                     <input id="url" name="url" />
                 </label>
@@ -145,10 +145,13 @@ function CreatePlaylist() {
 function App() {
     return (
         <div className="App bg-black">
-            <div className="main">
+            <div>
                 <LogIn />
                 <div className="title">Soundify</div>
                 <CreatePlaylist />
+            </div>
+            <div className="footer text-white">
+                Version 1.0.0
             </div>
         </div>
     );

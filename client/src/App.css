@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  padding: 15% 10% 25% 10%;
+  padding: 15% 10%;
 }
 
 .html, body {
@@ -74,17 +74,17 @@
 
 .playlist {
   background-color: #322c2c;
-  border: 3px solid #322c2c;
+  border: 2px solid #322c2c;
   align-items: center;
   border-radius: 20px;
   display: flex;
   text-decoration: none;
   justify-content: space-evenly;
-  margin: 20px auto;
-  padding: 20px 10px;
-  width: 400px;
+  margin: 20px auto 0 auto;
+  padding: 10px 20px;
+  width: 300px;
 }
 
 .playlist:hover {
-  border: 3px solid #1DB954;
+  border: 2px solid #FFFFFF;
 }

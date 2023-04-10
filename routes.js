@@ -15,7 +15,7 @@ const getTracklist = require('./services/getShowInfo');
 const makeSpotifyApiCall = require('./services/makeSpotifyApiCall');
 const lookUpAccessToken = require('./services/lookUpAccessToken');
 
-const Users = require('./models/User');
+const User = require('./models/User');
 
 const state = randomstring.generate();
 const redirectUri = 'http://localhost:3000/api/loginRedirect';
@@ -65,7 +65,7 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
 
         if (accessToken) {
             const sessionId = randomstring.generate();
-            await Users.create({
+            await User.create({
                 userName: '',
                 sessionId,
                 accessToken,
@@ -99,7 +99,7 @@ router.get('/api/getUserName', cors(), async (req, res) => {
         const userInfo = await getUserInfo(spotifyApiBaseUrl, accessToken);
         const userName = userInfo.data.display_name;
 
-        const user = await Users.findOne({
+        const user = await User.findOne({
             sessionId,
         }).exec();
 
