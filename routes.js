@@ -7,6 +7,7 @@ const querystring = require('node:querystring');
 const axios = require('axios');
 const { get } = require('lodash');
 const randomstring = require('randomstring');
+const path = require('path');
 
 const expiresAt = require('./services/expiresAt');
 const getAccessToken = require('./services/getAccessToken');
@@ -18,7 +19,7 @@ const lookUpAccessToken = require('./services/lookUpAccessToken');
 const User = require('./models/User');
 
 const state = randomstring.generate();
-const redirectUri = 'http://localhost:3000/api/loginRedirect';
+const redirectUri = process.env.REDIRECT_URI || null;
 const clientId = process.env.CLIENT_ID || null;
 const clientSecret = process.env.CLIENT_SECRET || null;
 const spotifyAccountsBaseUrl = 'https://accounts.spotify.com/';
@@ -223,6 +224,10 @@ router.post('/api/:showId', cors(), async (req, res) => {
             images: matchingPlaylist.images,
         });
     }
+});
+
+router.get('/*', (req, res) => {
+    res.sendFile('index.html');
 });
 
 module.exports = router;
