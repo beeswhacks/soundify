@@ -16,10 +16,11 @@ Create a Spotify playlist from a tracklist on BBC Sounds.
 3. Create a `.env` file in the `/client` directory with a variable named `REACT_APP_SERVER_PORT`. The React app is set up to proxy requests to relative URLs it doesn't recognise to the server side. This tells the proxy which port your server is running on.
 
 # TODO
-- [ ] Randomise state for Spotify authorisation
-- [ ] Implement refreshing of access token
+- [x] ~~Randomise state for Spotify authorisation~~
+- [x] ~~Implement refreshing of access token~~
 - [x] ~~Add indicator to show when user has connected to Spotify successfully~~
 - [x] ~~Show user's name when connected~~
-- [ ] Add proper link to Spotfy playlist (including playlist image)
+- [x] ~~Add proper link to Spotfy playlist (including playlist image)~~
 - [x] ~~Handle playlist already existing properly~~
 - [x] ~~Improve UI~~
+- [ ] Add info section explaining app purpose
