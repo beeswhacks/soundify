@@ -19,7 +19,7 @@ const lookUpAccessToken = require('./services/lookUpAccessToken');
 const User = require('./models/User');
 
 const state = randomstring.generate();
-const redirectUri = process.env.REDIRECT_URI || null;
+const redirectUri = `${process.env.APP_URL}/api/loginRedirect`;
 const clientId = process.env.CLIENT_ID || null;
 const clientSecret = process.env.CLIENT_SECRET || null;
 const spotifyAccountsBaseUrl = 'https://accounts.spotify.com/';
