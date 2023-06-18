@@ -4,26 +4,7 @@ import Cookies from 'js-cookie';
 import { isEmpty } from 'lodash';
 import spotifyIcon from './Spotify_Icon_RGB_Green.png';
 
-function LogIn() {
-    let buttonText = 'Connect to Spotify';
-    const sessionId = Cookies.get('sessionId');
-
-    if (sessionId) {
-        const userName = Cookies.get('user_name');
-        buttonText = `Connected as ${userName}`;
-    }
-
-    return (
-        <div>
-            <a
-                href="/api/login"
-                className="round-button bg-green text-black normalise-font-size"
-            >
-                {buttonText}
-            </a>
-        </div>
-    );
-}
+import { default as LogInButton } from './components/LogInButton';
 
 const showPlaylist = (options) => {
     const { name, url, image } = options;
@@ -146,7 +127,7 @@ function App() {
     return (
         <div className="App bg-black">
             <div>
-                <LogIn />
+                <LogInButton />
                 <div className="title">Soundify</div>
                 <CreatePlaylist />
             </div>
