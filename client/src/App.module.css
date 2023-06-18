@@ -1,0 +1,48 @@
+.app {
+    background-color: #191414;
+    background-color: #191414;
+    height: 100%;
+}
+
+.content {
+    width: auto;
+    text-align: center;
+    padding: 10%;
+}
+
+.footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 5px;
+    text-align: center;
+}
+
+.textWhite {
+    color: #FFFFFF;
+}
+
+.navBar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem;
+}
+
+.navBar .button {
+    background-color: #191414;
+    border-radius: 1em;
+    border: 0.08rem solid #FFFFFF;
+    color: #FFFFFF;
+    font-size: 0.8em;
+    padding: 0.3rem 0.5rem;
+    text-decoration: none;
+}
+
+.navBar .button:hover {
+    background-color: #FFFFFF;
+    border-radius: 1em;
+    border: 0.1rem solid #FFFFFF;
+    color: #191414;
+    padding: 0.3rem 0.5rem;
+}

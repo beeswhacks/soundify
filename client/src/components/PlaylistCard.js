@@ -1,8 +1,10 @@
+import css from './PlaylistCard.module.css';
+
 const PlaylistCard = (props) => {
     const { name, url, image } = props;
 
     return (
-        <a className="text-white playlist" href={url}>
+        <a className={css.playlist} href={url}>
             <span>
                 <img
                     alt="playlist artwork"
@@ -11,10 +13,7 @@ const PlaylistCard = (props) => {
                     src={image}
                 />
             </span>
-            <span
-                className="text-white"
-                style={{ textDecoration: 'none', margin: '10px' }}
-            >
+            <span style={{ textDecoration: 'none', margin: '10px' }}>
                 {name}
             </span>
         </a>

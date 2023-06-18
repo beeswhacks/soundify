@@ -1,0 +1,11 @@
+.marginAuto {
+    position: relative  ;
+    margin: auto;
+    width: 500px;
+}
+
+.title {
+    margin: 0.8em auto auto auto;
+    color: #1DB954;
+    font-size: 5em;
+}

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import Cookies from 'js-cookie';
 import { isEmpty } from 'lodash';
 import spotifyIcon from '../Spotify_Icon_RGB_Green.png';
-
 import PlaylistCard from './PlaylistCard';
+import css from './CreatePlaylistForm.module.css';
 
 const CreatePlaylistForm = () => {
     const [status, setStatus] = useState('');
@@ -68,12 +68,12 @@ const CreatePlaylistForm = () => {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <label className="text-white">
+                <label className={css.textWhite}>
                     Paste a BBC sounds URL below:
                     <br />
-                    <input id="url" name="url" />
+                    <input className={css.url} name="url" />
                 </label>
-                <button type="submit" id="submit-button">
+                <button type="submit" className={css.submitButton}>
                     Get playlist
                 </button>
             </form>
@@ -84,7 +84,7 @@ const CreatePlaylistForm = () => {
                     image={sessionStorage.getItem('playlistImage')}
                 />
             ) : (
-                <div className="wrap-text text-white">{feedbackText}</div>
+                <div className={css.feedbackText}>{feedbackText}</div>
             )}
         </>
     );

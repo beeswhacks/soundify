@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import css from './LogInButton.module.css';
 
 const LogInButton = () => {
     let buttonText = 'Connect to Spotify';
@@ -13,7 +14,7 @@ const LogInButton = () => {
         <div>
             <a
                 href="/api/login"
-                className="round-button bg-green text-black normalise-font-size"
+                className={css.button}
             >
                 {buttonText}
             </a>

@@ -1,0 +1,28 @@
+.textWhite {
+    color: #FFFFFF;
+}
+
+.url {
+    width: 22em;
+    border-radius: 1em;
+    border: none;
+    padding: 0.4em 0.8em;
+    margin: 1em 0.5em;
+}
+
+.submitButton {
+    background-color: #1DB954;
+    color: #191414;
+    border: none;
+    border-radius: 1em;
+    padding: 0.4em 0.8em;
+}
+
+.submitButton:hover {
+    background-color: #1e8f46;
+}
+
+.feedbackText {
+    overflow: hidden;
+    color: #FFFFFF;
+}
