@@ -1,13 +1,12 @@
-const express = require('express');
-const router = express.Router();
-var cors = require('cors');
-const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
-const querystring = require('node:querystring');
 const axios = require('axios');
+const cors = require('cors');
+const express = require('express');
 const { get } = require('lodash');
-const randomstring = require('randomstring');
+const { JSDOM } = require('jsdom');
 const path = require('path');
+const querystring = require('node:querystring');
+const randomstring = require('randomstring');
+const router = express.Router();
 
 const expiresAt = require('../services/expiresAt');
 const getAccessToken = require('../services/getAccessToken');
