@@ -16,6 +16,7 @@ const makeSpotifyApiCall = require('../services/makeSpotifyApiCall');
 const lookUpAccessToken = require('../services/lookUpAccessToken');
 
 const User = require('../models/User');
+const Playlist = require('../models/Playlist');
 
 const state = randomstring.generate();
 const redirectUri = `${process.env.APP_URL}/api/loginRedirect`;
@@ -65,6 +66,7 @@ router.get('/loginRedirect', cors(), async (req, res) => {
 
         if (accessToken) {
             const sessionId = randomstring.generate();
+            // TODO: change to upsert to avoid duplicates per user
             await User.create({
                 userName: '',
                 sessionId,
@@ -110,15 +112,9 @@ router.get('/getUserName', cors(), async (req, res) => {
     }
 });
 
-router.post('/:showId', cors(), async (req, res) => {
+router.post('/createPlaylist/:showId', cors(), async (req, res) => {
     const sessionId = req.cookies.sessionId;
-
-    const accessToken = await lookUpAccessToken(
-        sessionId,
-        spotifyAccountsBaseUrl,
-        clientId,
-        clientSecret
-    );
+    const userName = req.cookies['user_name'];
 
     // ----------------------------------------------------------------
     //              EXTRACT TRACKLIST FROM BBC SOUNDS
@@ -148,9 +144,13 @@ router.post('/:showId', cors(), async (req, res) => {
     //                   CREATE SPOTIFY PLAYLIST
     // ----------------------------------------------------------------
 
-    // get user's Spotify user_id
-    const userInfo = await getUserInfo(spotifyApiBaseUrl, accessToken);
-    const spotifyUserId = userInfo.data.id;
+    // get access token from session id
+    const accessToken = await lookUpAccessToken(
+        sessionId,
+        spotifyAccountsBaseUrl,
+        clientId,
+        clientSecret
+    );
 
     // check if user already has playlist for the show
     const userPlaylists = await makeSpotifyApiCall(
@@ -162,7 +162,7 @@ router.post('/:showId', cors(), async (req, res) => {
         }
     );
 
-    const matchingPlaylist = userPlaylists.data.items.some(
+    const matchingPlaylist = userPlaylists.data.items.find(
         (playlist) => playlist.name == playlistName
     );
 
@@ -173,7 +173,7 @@ router.post('/:showId', cors(), async (req, res) => {
             accessToken,
             {
                 method: 'post',
-                url: `/users/${spotifyUserId}/playlists`,
+                url: `/users/${userName}/playlists`,
                 data: {
                     name: playlistName,
                     description: 'Auto-generated using Soundify',
@@ -204,6 +204,15 @@ router.post('/:showId', cors(), async (req, res) => {
             }
         );
 
+        // add playlist to Playlists collection
+        await Playlist.create({
+            userName,
+            spotifyId: newPlaylist.data.id,
+            name: newPlaylist.data.name,
+            url: newPlaylist.data.external_urls.spotify,
+            imageUrl: newPlaylistImage.data.images[1].url,
+        });
+
         res.json({
             isCreated: true,
             url: newPlaylist.data.external_urls.spotify,
@@ -211,10 +220,18 @@ router.post('/:showId', cors(), async (req, res) => {
             images: newPlaylistImage.data,
         });
     } else {
-        // if the playlist already exists, return it to the user
-        const matchingPlaylist = userPlaylists.data.items.find(
-            (playlist) => playlist.name == playlistName
-        );
+        // add matching playlist to user history if it's not already there
+        await Playlist.findOneAndUpdate(
+            { userName, name: playlistName },
+            {
+                userName,
+                spotifyId: matchingPlaylist.id,
+                name: matchingPlaylist.name,
+                url: matchingPlaylist.external_urls.spotify,
+                imageUrl: matchingPlaylist.images[1].url,
+            },
+            { upsert: true }
+        )
 
         res.json({
             isCreated: false,

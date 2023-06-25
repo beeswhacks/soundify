@@ -8,6 +8,7 @@ const App = () => {
     return (
         <div className={css.app}>
             <div className={css.navBar}>
+                <Link to='/' className={css.button}>Home</Link>
                 <Link to='/history' className={css.button}>History</Link>
             </div>
             <div className={css.content}>

@@ -14,7 +14,8 @@ app.listen(PORT);
 
 mongoose
     .connect(process.env.MONGODB_URI)
-    .then(console.log('Connected to MongoDB.'));
+    .then(console.log('INFO: Connected to MongoDB.'));
 
 app.use('/api', require('./routes/routes'));
+app.use('/api/history', require('./routes/history'));
 app.use('/', require('./routes/serveReactApp'));

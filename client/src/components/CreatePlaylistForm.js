@@ -39,7 +39,7 @@ const CreatePlaylistForm = () => {
                 const showId = url.href.substring(url.href.lastIndexOf('/') + 1);
                 setStatus('generatingPlaylist');
 
-                fetch('/api/' + showId, {
+                fetch('/api/createPlaylist/' + showId, {
                     method: 'POST',
                 })
                     .then((response) => response.json())
