@@ -9,14 +9,14 @@ const { get } = require('lodash');
 const randomstring = require('randomstring');
 const path = require('path');
 
-const expiresAt = require('./services/expiresAt');
-const getAccessToken = require('./services/getAccessToken');
-const getUserInfo = require('./services/getUserInfo');
-const getTracklist = require('./services/getShowInfo');
-const makeSpotifyApiCall = require('./services/makeSpotifyApiCall');
-const lookUpAccessToken = require('./services/lookUpAccessToken');
+const expiresAt = require('../services/expiresAt');
+const getAccessToken = require('../services/getAccessToken');
+const getUserInfo = require('../services/getUserInfo');
+const getTracklist = require('../services/getShowInfo');
+const makeSpotifyApiCall = require('../services/makeSpotifyApiCall');
+const lookUpAccessToken = require('../services/lookUpAccessToken');
 
-const User = require('./models/User');
+const User = require('../models/User');
 
 const state = randomstring.generate();
 const redirectUri = `${process.env.APP_URL}/api/loginRedirect`;
@@ -26,11 +26,11 @@ const spotifyAccountsBaseUrl = 'https://accounts.spotify.com/';
 const spotifyApiBaseUrl = 'https://api.spotify.com/v1/';
 
 // authorise user through Spotify API
-router.get('/api/login', cors(), (req, res) => {
+router.get('/login', cors(), (req, res) => {
     const scope =
         'user-read-private user-read-email playlist-read-private playlist-modify-private playlist-modify-public';
 
-    // redirect login request to Spotify API
+        // redirect login request to Spotify API
     res.redirect(
         spotifyAccountsBaseUrl +
             'authorize?' +
@@ -45,7 +45,7 @@ router.get('/api/login', cors(), (req, res) => {
 });
 
 // Spotify API redirects here after user has logged in
-router.get('/api/loginRedirect', cors(), async (req, res) => {
+router.get('/loginRedirect', cors(), async (req, res) => {
     const responseState = get(req, 'query.state');
     const code = get(req, 'query.code');
     const error = get(req, 'query.error');
@@ -73,7 +73,7 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
                 refreshToken,
                 expiresAt: expiresAt(tokenExpiresIn),
             });
-            res.cookie('sessionId', sessionId).redirect(`/api/getUserName`);
+            res.cookie('sessionId', sessionId).redirect(`getUserName`);
         } else {
             res.cookie('sessionId', false).redirect('/');
         }
@@ -84,7 +84,7 @@ router.get('/api/loginRedirect', cors(), async (req, res) => {
     }
 });
 
-router.get('/api/getUserName', cors(), async (req, res) => {
+router.get('/getUserName', cors(), async (req, res) => {
     const sessionId = req.cookies.sessionId;
 
     const accessToken = await lookUpAccessToken(
@@ -111,7 +111,7 @@ router.get('/api/getUserName', cors(), async (req, res) => {
     }
 });
 
-router.post('/api/:showId', cors(), async (req, res) => {
+router.post('/:showId', cors(), async (req, res) => {
     const sessionId = req.cookies.sessionId;
 
     const accessToken = await lookUpAccessToken(
@@ -224,10 +224,6 @@ router.post('/api/:showId', cors(), async (req, res) => {
             images: matchingPlaylist.images,
         });
     }
-});
-
-router.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 module.exports = router;

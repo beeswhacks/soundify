@@ -16,5 +16,5 @@ mongoose
     .connect(process.env.MONGODB_URI)
     .then(console.log('Connected to MongoDB.'));
 
-const routes = require('./routes.js');
-app.use(routes);
+app.use('/api', require('./routes/routes'));
+app.use('/', require('./routes/serveReactApp'));
