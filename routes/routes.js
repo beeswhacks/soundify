@@ -210,13 +210,14 @@ router.post('/createPlaylist/:showId', cors(), async (req, res) => {
             spotifyId: newPlaylist.data.id,
             name: newPlaylist.data.name,
             url: newPlaylist.data.external_urls.spotify,
-            imageUrl: newPlaylistImage.data.images[1].url,
+            imageUrl: newPlaylistImage.data[1].url,
         });
 
         res.json({
             isCreated: true,
             url: newPlaylist.data.external_urls.spotify,
             name: newPlaylist.data.name,
+            // TODO: change this so that it only returns one image instead of all images
             images: newPlaylistImage.data,
         });
     } else {
