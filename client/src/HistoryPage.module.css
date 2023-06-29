@@ -2,5 +2,7 @@
     color: #FFFFFF;
     margin: auto;
     max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
     width: 400px;
 }

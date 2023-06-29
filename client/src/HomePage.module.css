@@ -1,11 +1,9 @@
-.marginAuto {
-    position: relative  ;
-    margin: auto;
-    width: 500px;
+.homePage {
+    padding: min(33%, 200px) 0;
 }
 
 .title {
-    margin: 0.8em auto auto auto;
+    margin: 0.4em auto auto auto;
     color: #1DB954;
     font-size: 5em;
 }

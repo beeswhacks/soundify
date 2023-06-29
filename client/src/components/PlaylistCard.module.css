@@ -3,6 +3,7 @@
     background-color: #322c2c;
     border-radius: 20px;
     border: 2px solid #322c2c;
+    box-sizing: border-box;
     color: #FFFFFF;
     display: flex;
     justify-content: space-evenly;
@@ -10,6 +11,7 @@
     padding: 10px 20px;
     text-decoration: none;
     width: 300px;
+    max-width: 95%;
 }
 
 .playlist:hover {

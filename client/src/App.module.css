@@ -1,13 +1,13 @@
 .app {
     background-color: #191414;
     background-color: #191414;
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
 }
 
 .content {
-    width: auto;
+    width: 100%;
     text-align: center;
-    padding: 10%;
 }
 
 .footer {
