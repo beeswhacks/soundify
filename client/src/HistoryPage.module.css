@@ -1,8 +1,7 @@
 .playlistListContainer {
     color: #FFFFFF;
     margin: auto;
-    max-width: 90%;
-    max-height: 90%;
+    max-height: 90vh;
     overflow-y: auto;
     width: 400px;
 }
