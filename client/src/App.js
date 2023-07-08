@@ -15,7 +15,7 @@ const App = () => {
                 <Outlet />
             </div>
             <div className={`${css.footer} ${css.textWhite}`}>
-                Version 1.0.0
+                Version 1.1.0
             </div>
         </div>
     );
